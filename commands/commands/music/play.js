@@ -45,7 +45,6 @@ export default {
 
       await interaction.deferReply();
 
-      const channel = interaction.member.voice.channel;
       const query = interaction.options.get('query');
       const volume = interaction.options.get('volume')?.value || 25;
 
@@ -114,7 +113,6 @@ export default {
       interaction.followUp({
         content: `${notificationPrefix} Error: ${err.message}`
       });
-      throw err;
     }
   }
 };

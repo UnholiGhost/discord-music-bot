@@ -1,13 +1,12 @@
 import * as env from 'dotenv';
-import { SlashCommandBuilder } from 'discord.js';
-import { GuildMember } from 'discord.js';
+import { SlashCommandBuilder, GuildMember } from 'discord.js';
 
 const notificationPrefix = env.config().parsed.NOTIFICATION_PREFIX;
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('list')
-    .setDescription('List the current queue.'),
+    .setName('shuffle')
+    .setDescription('Shuffle the queue.'),
   async execute(interaction, player) {
     if (
       !interaction.member.voice.channel ||
@@ -30,9 +29,17 @@ export default {
       });
     }
 
+    await interaction.deferReply();
+
     const queue = player.nodes.get(interaction.guildId);
 
-    if (typeof queue != 'undefined') {
+    if (!queue || !queue?.node.isPlaying())
+      return void interaction.followUp({
+        content: `${notificationPrefix} Error: no music's being played.`
+      });
+
+    try {
+      queue.tracks.shuffle();
       const trimString = (str, max) =>
         str.length > max ? `${str.slice(0, max - 3)}...` : str;
       const joinArray = arr => {
@@ -44,7 +51,7 @@ export default {
         }
         return result;
       };
-      return void interaction.reply({
+      return void interaction.followUp({
         embeds: [
           {
             title: 'Now Playing',
@@ -57,9 +64,10 @@ export default {
           }
         ]
       });
-    } else {
-      return void interaction.reply({
-        content: `${notificationPrefix} There's no entries in the queue.`
+    } catch (err) {
+      console.log(`${notificationPrefix} Error: ${err}`);
+      interaction.followUp({
+        content: `${notificationPrefix} Error: ${err.message}`
       });
     }
   }
