@@ -22,50 +22,58 @@ export default {
     ),
 
   async execute(interaction, player) {
-    if (
-      !interaction.member.voice.channel ||
-      !(interaction.member instanceof GuildMember)
-    ) {
-      return interaction.reply({
-        content: `${notificationPrefix} Warning: you've got to be in a voice channel to use this command.`,
-        ephemeral: true
-      });
-    }
+    try {
+      if (
+        !interaction.member.voice.channel ||
+        !(interaction.member instanceof GuildMember)
+      ) {
+        return interaction.reply({
+          content: `${notificationPrefix} Warning: you've got to be in a voice channel to use this command.`,
+          ephemeral: true
+        });
+      }
 
-    if (
-      interaction.guild.members.me.voice.channelId &&
-      interaction.member.voice.channelId !==
-        interaction.guild.members.me.voice.channelId
-    ) {
-      return void interaction.reply({
-        content: `${notificationPrefix} Warning: you're not in the right voice channel.`,
-        ephemeral: true
-      });
-    }
+      if (
+        interaction.guild.members.me.voice.channelId &&
+        interaction.member.voice.channelId !==
+          interaction.guild.members.me.voice.channelId
+      ) {
+        return void interaction.reply({
+          content: `${notificationPrefix} Warning: you're not in the right voice channel.`,
+          ephemeral: true
+        });
+      }
 
-    await interaction.deferReply();
+      await interaction.deferReply();
 
-    const queue = player.nodes.get(interaction.guildId);
+      const queue = player.nodes.get(interaction.guildId);
 
-    if (!queue || !queue?.node.isPlaying())
+      if (!queue || !queue?.node.isPlaying())
+        return void interaction.followUp({
+          content: `${notificationPrefix} Error: no music's being played.`
+        });
+
+      let query = interaction.options.get('seconds').value;
+      let queryMilliseconds =
+        interaction.options.get('milliseconds')?.value || 0;
+
+      queryMilliseconds = Math.max(0, queryMilliseconds);
+      queryMilliseconds = Math.min(999, queryMilliseconds);
+
+      const success = queue.node.seek(query * 1000 + queryMilliseconds);
+
       return void interaction.followUp({
-        content: `${notificationPrefix} Error: no music's being played.`
+        content: success
+          ? `${notificationPrefix} Notification: seeking at ${
+              (query * 1000 + queryMilliseconds) / 1000
+            } seconds...`
+          : `${notificationPrefix} Notification: something's gone wrong.`
       });
-
-    let query = interaction.options.get('seconds').value;
-    let queryMilliseconds = interaction.options.get('milliseconds')?.value || 0;
-
-    queryMilliseconds = Math.max(0, queryMilliseconds);
-    queryMilliseconds = Math.min(999, queryMilliseconds);
-
-    const success = queue.node.seek(query * 1000 + queryMilliseconds);
-
-    return void interaction.followUp({
-      content: success
-        ? `${notificationPrefix} Notification: seeking at ${
-            (query * 1000 + queryMilliseconds) / 1000
-          } seconds...`
-        : `${notificationPrefix} Notification: something's gone wrong.`
-    });
+    } catch (err) {
+      console.log(`${notificationPrefix} Error: ${err}`);
+      interaction.followUp({
+        content: `${notificationPrefix} Error: ${err.message}`
+      });
+    }
   }
 };
