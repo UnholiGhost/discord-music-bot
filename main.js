@@ -99,20 +99,20 @@ await rest.put(Routes.applicationCommands(clientId), {
 const player = new Player(bot);
 await player.extractors.loadDefault();
 
-player.on('connectionCreate', queue => {
-  queue.connection.voiceConnection.on('stateChange', (oldState, newState) => {
-    const oldNetworking = Reflect.get(oldState, 'networking');
-    const newNetworking = Reflect.get(newState, 'networking');
+// player.on('connectionCreate', queue => {
+//   queue.connection.voiceConnection.on('stateChange', (oldState, newState) => {
+//     const oldNetworking = Reflect.get(oldState, 'networking');
+//     const newNetworking = Reflect.get(newState, 'networking');
 
-    const networkStateChangeHandler = (oldNetworkState, newNetworkState) => {
-      const newUdp = Reflect.get(newNetworkState, 'udp');
-      clearInterval(newUdp?.keepAliveInterval);
-    };
+//     const networkStateChangeHandler = (oldNetworkState, newNetworkState) => {
+//       const newUdp = Reflect.get(newNetworkState, 'udp');
+//       clearInterval(newUdp?.keepAliveInterval);
+//     };
 
-    oldNetworking?.off('stateChange', networkStateChangeHandler);
-    newNetworking?.on('stateChange', networkStateChangeHandler);
-  });
-});
+//     oldNetworking?.off('stateChange', networkStateChangeHandler);
+//     newNetworking?.on('stateChange', networkStateChangeHandler);
+//   });
+// });
 
 player.on('error', (queue, err) => {
   console.log(
