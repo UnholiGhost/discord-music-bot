@@ -106,8 +106,8 @@ export default {
         }...`
       });
       searchResult.playlist
-        ? queue.insert(searchResult.tracks, 0)
-        : queue.insert(searchResult.tracks[0], 0);
+        ? queue.insertTrack(searchResult.tracks, 0)
+        : queue.insertTrack(searchResult.tracks[0], 0);
       if (!queue?.node.isPlaying()) await queue.node.play();
     } catch (err) {
       console.log(`${notificationPrefix} Error: ${err}`);
