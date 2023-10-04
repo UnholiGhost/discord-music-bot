@@ -45,7 +45,7 @@ export default {
 
       const queue = player.nodes.get(interaction.guildId);
 
-      let query = interaction.options.get('position').value || 1;
+      let query = interaction.options.get('position')?.value || 1;
 
       if (!queue || !queue?.node.isPlaying())
         return void interaction.followUp({

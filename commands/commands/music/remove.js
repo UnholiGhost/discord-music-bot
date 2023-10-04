@@ -43,7 +43,7 @@ export default {
 
       const queue = player.nodes.get(interaction.guildId);
 
-      let query = interaction.options.get('position').value || false;
+      let query = interaction.options.get('position')?.value || false;
 
       if (!queue || !queue?.node.isPlaying())
         return void interaction.followUp({
@@ -56,7 +56,7 @@ export default {
           ephemeral: true
         });
       }
-      if (queue.tracks.length - 1 < query || 1) {
+      if (queue.tracks.length - 1 < (query || 1)) {
         return void interaction.followUp({
           content: `${notificationPrefix} Warning: there's no position No.${query}.`,
           ephemeral: true
@@ -64,7 +64,7 @@ export default {
       }
 
       const lastTrack =
-        queue.tracks.data[queue ? query - 1 : queue.tracks.data.length - 1];
+        queue.tracks.data[query ? query - 1 : queue.tracks.data.length - 1];
       const success = queue.node.remove(lastTrack);
 
       return void interaction.followUp({
