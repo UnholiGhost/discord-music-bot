@@ -56,9 +56,9 @@ export default {
           ephemeral: true
         });
       }
-      if (queue.tracks.length - 1 < (query || 1)) {
+      if (queue.tracks.length - 1 < Math.abs(query || 1)) {
         return void interaction.followUp({
-          content: `${notificationPrefix} Warning: there's no position No.${query}.`,
+          content: `${notificationPrefix} Warning: there's nothing on the position No.${query}.`,
           ephemeral: true
         });
       }

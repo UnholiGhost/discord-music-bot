@@ -256,14 +256,15 @@ try {
     const logChannel = bot.channels.cache.find(
       channel => channel.name == 'bot-logs'
     );
-    if (!logChannel) return;
+    if (!logChannel || newState.member.id == bot.user.id) return;
 
     const now = new Date();
 
     const newVoiceChannel = newState.channel;
     const oldVoiceChannel = oldState.channel;
 
-    if (newVoiceChannel) {
+    // Joined a New Channel
+    if (newVoiceChannel && !oldState.channelId) {
       let guild = VoiceChannelStays.find(
         guild => guild.id === newVoiceChannel.guild.id
       );
@@ -279,6 +280,9 @@ try {
 
       guild.activeMembers.push({
         id: newState.member.id,
+        channel: {
+          id: newVoiceChannel.id
+        },
         startOfStay: now.getTime()
       });
 
@@ -291,7 +295,8 @@ try {
       );
     }
 
-    if (oldVoiceChannel) {
+    // Left a Channel without Joining Another
+    if (oldVoiceChannel && !newState.channelId) {
       const guild = VoiceChannelStays.find(
         guild => guild.id == oldVoiceChannel.guild.id
       );
@@ -309,7 +314,7 @@ try {
           (now.getTime() - activeMember.startOfStay) / 1000
         );
 
-        logChannel.send(
+        await logChannel.send(
           `${notificationPrefix} Log: ${
             oldState.member
           } left the voice channel '${
@@ -322,6 +327,74 @@ try {
           member => member.id != activeMember.id
         );
       }
+    }
+
+    // Switched a Channel
+    if (newVoiceChannel && oldState.channelId) {
+      let guild = VoiceChannelStays.find(
+        guild => guild.id === newVoiceChannel.guild.id
+      );
+
+      const activeMember = guild?.activeMembers.find(
+        member => member.id == oldState.member.id
+      );
+
+      guild.activeMembers = guild.activeMembers.filter(
+        member => member.id != activeMember.id
+      );
+
+      if (!guild) {
+        VoiceChannelStays.push({
+          id: newVoiceChannel.guild.id,
+          activeMembers: []
+        });
+        guild = VoiceChannelStays.find(
+          guild => guild.id === newVoiceChannel.guild.id
+        );
+        guild.activeMembers.push({
+          id: newState.member.id,
+          channel: {
+            id: newVoiceChannel.id
+          },
+          startOfStay: now.getTime()
+        });
+      }
+
+      if (!activeMember) {
+        await logChannel.send(
+          `${notificationPrefix} Log: ${oldState.member} left the voice channel '${oldVoiceChannel.name}'.
+        Our Bot could not time the member's stay in the voice channel.`
+        );
+      } else {
+        const secondsOfStay = Math.round(
+          (now.getTime() - activeMember.startOfStay) / 1000
+        );
+
+        await logChannel.send(
+          `${notificationPrefix} Log: ${
+            oldState.member
+          } left the voice channel '${
+            oldVoiceChannel.name
+          }' at ${getFormatedDate(now)}, 
+          having stayed for ${getHoursMinutesSecondsString(secondsOfStay)}.`
+        );
+      }
+
+      guild.activeMembers.push({
+        id: newState.member.id,
+        channel: {
+          id: newVoiceChannel.id
+        },
+        startOfStay: now.getTime()
+      });
+
+      await logChannel.send(
+        `${notificationPrefix} Log: ${
+          newState.member
+        } joined the voice channel '${
+          newVoiceChannel.name
+        }' at ${getFormatedDate(now)}.`
+      );
     }
   });
 

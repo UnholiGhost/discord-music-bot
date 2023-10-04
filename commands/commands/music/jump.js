@@ -6,16 +6,18 @@ const notificationPrefix = env.config().parsed.NOTIFICATION_PREFIX;
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('shift')
-    .setDescription(
-      'Remove entries from the queue starting from the first one.'
-    )
+    .setName('jump')
+    .setDescription('Play the entry on the selected position.')
     .addIntegerOption(option =>
       option
         .setName('position')
-        .setDescription(
-          'Enter the position, entries up to which are to be removed. 0 is going to remove only the next one.'
-        )
+        .setDescription('Enter the position to skip to.')
+        .setRequired(true)
+    )
+    .addBooleanOption(option =>
+      option
+        .setName('skip')
+        .setDescription('Skip all entries up to the selected position?')
         .setRequired(false)
     ),
   async execute(interaction, player) {
@@ -45,51 +47,43 @@ export default {
 
       const queue = player.nodes.get(interaction.guildId);
 
-      let query = interaction.options.get('position')?.value || 1;
+      const query = interaction.options.get('position').value || false;
+      const skip = interaction.options.get('skip')?.value || false;
 
       if (!queue || !queue?.node.isPlaying())
         return void interaction.followUp({
           content: `${notificationPrefix} Error: no music's being played.`
         });
 
-      if (queue.tracks.length < 1) {
+      if (queue.tracks.length < 2) {
         return void interaction.followUp({
           content: `${notificationPrefix} Warning: the queue is empty.`,
-          ephemeral: true
-        });
-      }
-      if (queue.tracks.length < 1) {
-        return void interaction.followUp({
-          content: `${notificationPrefix} Warning: the queue is empty.`,
-          ephemeral: true
-        });
-      }
-      if (queue.tracks.length == 1) {
-        return void interaction.followUp({
-          content: `${notificationPrefix} Warning: there's nothing to shift.`,
           ephemeral: true
         });
       }
       if (queue.tracks.length - 1 < Math.abs(query || 1)) {
         return void interaction.followUp({
-          content: `${notificationPrefix} Warning: there's nothing on the position No.${query}.`,
+          content: `${notificationPrefix} Warning: there's no position No.${query}.`,
           ephemeral: true
         });
       }
 
-      const nextTracks = queue.tracks.data.slice(0, query - 1);
-      const nextTrack = queue.tracks.data[query - 1];
+      const lastTrack = queue.tracks.data[query - 1];
 
-      let success;
+      if (skip) {
+        const nextTracks = queue.tracks.data.slice(0, query);
 
-      nextTracks.reverse();
-      nextTracks.map(el => {
-        success = queue.node.remove(el);
-      });
+        nextTracks.reverse();
+        nextTracks.map(el => {
+          success = queue.node.remove(el);
+        });
+      }
+
+      queue.node.jump(lastTrack);
 
       return void interaction.followUp({
         content: success
-          ? `${notificationPrefix} Notification: removed entries up to '${nextTrack}' from the queue.`
+          ? `${notificationPrefix} Notification: removed '${lastTrack}' from the queue.`
           : `${notificationPrefix} Notification: something's gone wrong.`
       });
     } catch (err) {
