@@ -43,9 +43,7 @@ export default {
       const success = queue.clear();
 
       return void interaction.followUp({
-        content: success
-          ? `${notificationPrefix} Notification: cleared the queue'.`
-          : `${notificationPrefix} Notification: something's gone wrong.`
+        content: `${notificationPrefix} Notification: cleared the queue'.`
       });
     } catch (err) {
       console.log(`${notificationPrefix} Error: ${err}`);
