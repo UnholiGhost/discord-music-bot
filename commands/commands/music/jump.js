@@ -70,8 +70,10 @@ export default {
 
       const lastTrack = queue.tracks.data[query - 1];
 
+      let success = true;
+
       if (skip) {
-        const nextTracks = queue.tracks.data.slice(0, query);
+        const nextTracks = queue.tracks.data.slice(0, query - 1);
 
         nextTracks.reverse();
         nextTracks.map(el => {
@@ -79,12 +81,13 @@ export default {
         });
       }
 
-      queue.node.jump(lastTrack);
+      const jumpingSuccess = queue.node.jump(lastTrack);
 
       return void interaction.followUp({
-        content: success
-          ? `${notificationPrefix} Notification: removed '${lastTrack}' from the queue.`
-          : `${notificationPrefix} Notification: something's gone wrong.`
+        content:
+          success && jumpingSuccess
+            ? `${notificationPrefix} Notification: jumped to '${lastTrack}'.`
+            : `${notificationPrefix} Notification: something's gone wrong.`
       });
     } catch (err) {
       console.log(`${notificationPrefix} Error: ${err}`);
