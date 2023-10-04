@@ -7,7 +7,17 @@ const notificationPrefix = env.config().parsed.NOTIFICATION_PREFIX;
 export default {
   data: new SlashCommandBuilder()
     .setName('shift')
-    .setDescription('Remove the next entry from the queue.'),
+    .setDescription(
+      'Remove entries from the queue starting from the first one.'
+    )
+    .addIntegerOption(option =>
+      option
+        .setName('position')
+        .setDescription(
+          'Enter the position, entries up to which are to be removed. 0 is going to remove only the next one.'
+        )
+        .setRequired(false)
+    ),
   async execute(interaction, player) {
     try {
       if (
@@ -35,6 +45,8 @@ export default {
 
       const queue = player.nodes.get(interaction.guildId);
 
+      let query = interaction.options.get('position').value || 1;
+
       if (!queue || !queue?.node.isPlaying())
         return void interaction.followUp({
           content: `${notificationPrefix} Error: no music's being played.`
@@ -46,13 +58,24 @@ export default {
           ephemeral: true
         });
       }
+      if (queue.tracks.length - 1 < query) {
+        return void interaction.followUp({
+          content: `${notificationPrefix} Warning: there's no position No.${query}.`,
+          ephemeral: true
+        });
+      }
 
-      const nestTrack = queue.tracks.data[0];
-      const success = queue.node.remove(nestTrack);
+      const nextTracks = queue.tracks.data.slice(0, query);
+      let success = queue.node.remove(nextTracks);
+
+      nextTracks.reverse();
+      nextTracks.map(el => {
+        success = queue.node.remove(el);
+      });
 
       return void interaction.followUp({
         content: success
-          ? `${notificationPrefix} Notification: removed '${nestTrack}' from the queue.`
+          ? `${notificationPrefix} Notification: removed entries up to '${nextTracks[0]}' from the queue.`
           : `${notificationPrefix} Notification: something's gone wrong.`
       });
     } catch (err) {
