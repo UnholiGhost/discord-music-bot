@@ -256,7 +256,12 @@ try {
     const logChannel = bot.channels.cache.find(
       channel => channel.name == 'bot-logs'
     );
-    if (!logChannel || newState.member.id == bot.user.id) return;
+    if (
+      !logChannel ||
+      newState.member.id == bot.user.id ||
+      oldState.channelId == newState.channelId
+    )
+      return;
 
     const now = new Date();
 
