@@ -24,7 +24,7 @@ try {
   const notificationPrefix = env.config().parsed.NOTIFICATION_PREFIX;
   const _dirname = new URL(import.meta.url).pathname.slice(1);
 
-  const voiceChannelStays = [];
+  const channelsWithActiveUsers = [];
 
   const bot = new Client({
     intents: [
@@ -179,7 +179,7 @@ try {
 
   // On Voice State Change
   bot.on('voiceStateUpdate', async (oldState, newState) => {
-    voiceStateChange(bot, oldState, newState, voiceChannelStays);
+    voiceStateChange(bot, oldState, newState, channelsWithActiveUsers);
   });
 
   // Log In

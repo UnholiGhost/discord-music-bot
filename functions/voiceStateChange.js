@@ -12,7 +12,7 @@ export async function voiceStateChange(
   bot,
   oldState,
   newState,
-  voiceChannelStays
+  channelsWithActiveUsers
 ) {
   const logChannel = bot.channels.cache.find(
     channel =>
@@ -34,15 +34,15 @@ export async function voiceStateChange(
 
   // Joined a New Channel
   if (newVoiceChannel && !oldState.channelId) {
-    let guild = voiceChannelStays.find(
+    let guild = channelsWithActiveUsers.find(
       guild => guild.id === newVoiceChannel.guild.id
     );
     if (!guild) {
-      voiceChannelStays.push({
+      channelsWithActiveUsers.push({
         id: newVoiceChannel.guild.id,
         activeMembers: []
       });
-      guild = voiceChannelStays.find(
+      guild = channelsWithActiveUsers.find(
         guild => guild.id === newVoiceChannel.guild.id
       );
     }
@@ -66,7 +66,7 @@ export async function voiceStateChange(
 
   // Left a Channel without Joining Another
   if (oldVoiceChannel && !newState.channelId) {
-    const guild = voiceChannelStays.find(
+    const guild = channelsWithActiveUsers.find(
       guild => guild.id == oldVoiceChannel.guild.id
     );
     const activeMember = guild?.activeMembers.find(
@@ -100,7 +100,7 @@ export async function voiceStateChange(
 
   // Switched a Channel
   if (newVoiceChannel && oldState.channelId) {
-    let guild = voiceChannelStays.find(
+    let guild = channelsWithActiveUsers.find(
       guild => guild.id === newVoiceChannel.guild.id
     );
 
@@ -113,11 +113,11 @@ export async function voiceStateChange(
     );
 
     if (!guild) {
-      voiceChannelStays.push({
+      channelsWithActiveUsers.push({
         id: newVoiceChannel.guild.id,
         activeMembers: []
       });
-      guild = voiceChannelStays.find(
+      guild = channelsWithActiveUsers.find(
         guild => guild.id === newVoiceChannel.guild.id
       );
       guild.activeMembers.push({
