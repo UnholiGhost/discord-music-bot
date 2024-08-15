@@ -9,6 +9,7 @@ import {
   Routes
 } from 'discord.js';
 import { Player } from 'discord-player';
+import { YoutubeiExtractor } from 'discord-player-youtubei';
 import fs from 'fs';
 import path from 'path';
 
@@ -22,6 +23,7 @@ try {
   const publicKey = env.config().parsed.PUBLIC_KEY;
   const clientId = env.config().parsed.CLIENT_ID;
   const notificationPrefix = env.config().parsed.NOTIFICATION_PREFIX;
+  const oauthTokens = env.config().parsed.YOUTUBE_TOKENS;
   const _dirname = new URL(import.meta.url).pathname.slice(1);
 
   const channelsWithActiveUsers = [];
@@ -104,7 +106,10 @@ try {
 
   // Player Configuration
   const player = new Player(bot);
-  await player.extractors.loadDefault();
+  await player.extractors.loadDefault(ext => ext !== 'YouTubeExtractor');
+  await player.extractors.register(YoutubeiExtractor, {
+    authentication: oauthTokens
+  });
 
   player.on('error', (queue, err) => {
     console.log(
