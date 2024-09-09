@@ -3,8 +3,8 @@ import { SlashCommandBuilder, GuildMember } from 'discord.js';
 import { QueryType } from 'discord-player';
 
 // When adding new songs don't forget to:
-// 1) add new choices to Choices ENUM-esque object;
-// 2) add new URL's to songs list;
+// 1) add new choices to 'Choices' ENUM-esque object;
+// 2) add new song addresses to 'songs' list;
 // 3) add new options for the user to select in .setChoices(...)
 // Don't forget to call this file local.js instead of local.js.example
 // I suggest you add your song files into ./../../songs
@@ -16,7 +16,7 @@ const Choices = {
 };
 
 // (2)
-const songs = ['[song1 url]', '[song2 address]'];
+const songs = ['[song1 local address]', '[song2 local address]'];
 
 const notificationPrefix = env.config().parsed.NOTIFICATION_PREFIX;
 
