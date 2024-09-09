@@ -8,6 +8,8 @@ const publicKey = env.config().parsed.PUBLIC_KEY;
 const clientId = env.config().parsed.CLIENT_ID;
 const notificationPrefix = env.config().parsed.NOTIFICATION_PREFIX;
 
+// Not really sure what all of this does,
+// but I'm still gonna keet it because what if.
 export async function voiceStateChange(
   bot,
   oldState,
