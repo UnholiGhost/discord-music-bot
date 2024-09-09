@@ -6,3 +6,6 @@ Early beta for me and my friends. Don't use
 npx --no discord-player-youtubei
 ```
 ### from your command line. You will obviously need Node.js installed for that.
+
+## Custom songs
+### If you want to add some local songs or any audio files really for the bot to play, take a look at the *.local.js.example* in *./commands/commands/* 
