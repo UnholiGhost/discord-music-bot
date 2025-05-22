@@ -8,6 +8,7 @@ import {
   REST,
   Routes
 } from 'discord.js';
+import { DefaultExtractors } from '@discord-player/extractor';
 import { Player } from 'discord-player';
 import { YoutubeiExtractor } from 'discord-player-youtubei';
 import fs from 'fs';
@@ -106,9 +107,13 @@ try {
 
   // Player Configuration
   const player = new Player(bot);
-  await player.extractors.loadDefault(ext => ext !== 'YouTubeExtractor');
+  await player.extractors.loadMulti(DefaultExtractors);
   await player.extractors.register(YoutubeiExtractor, {
-    authentication: oauthTokens
+    authentication: oauthTokens,
+    generateWithPoToken: true,
+    streamOptions: {
+      useClient: 'WEB'
+    }
   });
 
   player.on('error', (queue, err) => {
