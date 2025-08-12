@@ -194,5 +194,14 @@ bot.on('voiceStateUpdate', async (oldState, newState) => {
   voiceStateChange(bot, oldState, newState, channelsWithActiveUsers);
 });
 
-// Log In
+// const infiniteLoop = () => {
+//   try {
+//     // Log In
 bot.login(appToken);
+//   } catch (e) {
+//     console.log(e.message);
+//     infiniteLoop();
+//   }
+// };
+
+// infiniteLoop();
